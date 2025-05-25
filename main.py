@@ -3,7 +3,7 @@ title: Easy Wikipedia
 author: Jason Mulligan <jason.mulligan@avoidwork.com>
 author_url: https://github.com/avoidwork
 funding_url: https://github.com/avoidwork/easy-wikipedia
-version: 1.0.0
+version: 1.0.1
 """
 
 import requests
@@ -67,11 +67,7 @@ class Tools:
         data = resp.text
         if len(data) == 0:
             return f'Failed to fetch page for "{search_title}".'
-        result = f"""Show the page result for \"{search_title}\":
-
-        {parse_html(data)}
-        """
-        return result
+        return parse_html(data)
 
     def search(self, title: str) -> str:
         search_title = title.strip().strip('"').strip("'")
@@ -88,8 +84,4 @@ class Tools:
             "timestamp": data.get("timestamp"),
             "revision": data.get("revision"),
         }
-        result = f"""Show the page summary result for \"{search_title}\":
-
-{json.dumps(page)}
-"""
-        return result
+        return json.dumps(page)
