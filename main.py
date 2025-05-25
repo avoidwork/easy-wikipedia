@@ -8,10 +8,47 @@ version: 1.0.0
 
 import requests
 import json
+from html.parser import HTMLParser
 from urllib.parse import quote
 
 BASE_URL = "https://en.wikipedia.org/api/rest_v1"
 LANGUAGE = "en-US"
+
+
+class EasyWikipediaHTMLParser(HTMLParser):
+    _tags = ["h1", "h2", "h3", "h4", "p"]
+    _text = []
+    _stream = []
+    _capture = False
+
+    def handle_starttag(self, tag, _args):
+        if tag in self._tags:
+            self._capture = True
+            self._stream.clear()
+
+    def handle_endtag(self, tag):
+        if tag in self._tags:
+            self._capture = False
+            text = "".join(self._stream)
+            text = text.strip().rstrip()
+            if len(text) > 1:
+                trailing_char = "\n" if tag == "p" else ""
+                formatted_text = f"{text}{trailing_char}"
+                self._text.append(formatted_text)
+            self._stream.clear()
+
+    def handle_data(self, data):
+        if self._capture:
+            self._stream.append(data)
+
+    def close(self):
+        return "\n".join(self._text)
+
+
+def parse_html(page_html):
+    parser = EasyWikipediaHTMLParser()
+    parser.feed(page_html)
+    return parser.close()
 
 
 class Tools:
@@ -19,14 +56,31 @@ class Tools:
         self.citation = True
         pass
 
-    def summary(self, title: str) -> str:
+    def page(self, title: str) -> str:
+        search_title = title.strip().strip('"').strip("'")
+        url = f"{BASE_URL}/page/html/{quote(search_title)}?redirect=false&stash=false"
+        headers = {
+            "Accept": 'text/html; charset=utf-8; profile="https://www.mediawiki.org/wiki/Specs/HTML/2.1.0"',
+            "Accept-Language": LANGUAGE,
+        }
+        resp = requests.get(url, headers=headers)
+        data = resp.text
+        if len(data) == 0:
+            return f'Failed to fetch page for "{search_title}".'
+        result = f"""Show the page result for \"{search_title}\":
+
+        {parse_html(data)}
+        """
+        return result
+
+    def search(self, title: str) -> str:
         search_title = title.strip().strip('"').strip("'")
         url = f"{BASE_URL}/page/summary/{quote(search_title)}?redirect=false"
         headers = {"Accept": "application/json", "Accept-Language": LANGUAGE}
         resp = requests.get(url, headers=headers)
         data = resp.json()
         if not isinstance(data, dict):
-            return f"Failed to fetch page summary for {search_title}."
+            return f'Failed to fetch page summary for "{search_title}".'
         page = {
             "title": data.get("title"),
             "description": data.get("description"),
@@ -34,7 +88,7 @@ class Tools:
             "timestamp": data.get("timestamp"),
             "revision": data.get("revision"),
         }
-        result = f"""Show the page summary result:
+        result = f"""Show the page summary result for \"{search_title}\":
 
 {json.dumps(page)}
 """
