@@ -3,7 +3,7 @@ title: Easy Wikipedia
 author: Jason Mulligan <jason.mulligan@avoidwork.com>
 author_url: https://github.com/avoidwork
 funding_url: https://github.com/avoidwork/easy-wikipedia
-version: 1.0.2
+version: 1.0.3
 """
 
 import requests
@@ -42,7 +42,9 @@ class EasyWikipediaHTMLParser(HTMLParser):
             self._stream.append(data)
 
     def close(self):
-        return "\n".join(self._text)
+        text = "\n".join(self._text)
+        self._text.clear()
+        return text
 
 
 def parse_html(page_html):
