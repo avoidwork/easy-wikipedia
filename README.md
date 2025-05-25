@@ -11,6 +11,7 @@ A Wikipedia tool for your LLM.
 Here are some example prompts you can use with your LLM to interact with Easy Wikipedia:
 
 ### Get Wikipedia Page Content (`page`)
+- `Tell me about "Adobe".`
 - `Show me the full Wikipedia page for "Alan Turing".`
 - `Fetch the article content for "Quantum computing".`
 - `Display the Wikipedia entry for "Artificial Intelligence".`
