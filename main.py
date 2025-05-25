@@ -3,11 +3,12 @@ title: Easy Wikipedia
 author: Jason Mulligan <jason.mulligan@avoidwork.com>
 author_url: https://github.com/avoidwork
 funding_url: https://github.com/avoidwork/easy-wikipedia
-version: 1.0.3
+version: 1.0.4
 """
 
 import requests
 import json
+import re
 from html.parser import HTMLParser
 from urllib.parse import quote
 
@@ -31,6 +32,7 @@ class EasyWikipediaHTMLParser(HTMLParser):
             self._capture = False
             text = "".join(self._stream)
             text = text.strip().rstrip()
+            text = re.sub(r"\[[^\]]+\]", "", text)
             if len(text) > 1:
                 trailing_char = "\n" if tag == "p" else ""
                 formatted_text = f"{text}{trailing_char}"
@@ -39,7 +41,11 @@ class EasyWikipediaHTMLParser(HTMLParser):
 
     def handle_data(self, data):
         if self._capture:
-            self._stream.append(data)
+            invalid = len(data.strip()) > 1 and all(
+                word.startswith(".") for word in data.split(" ")
+            )
+            if not invalid:
+                self._stream.append(data)
 
     def close(self):
         text = "\n".join(self._text)
