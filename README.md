@@ -25,4 +25,4 @@ Here are some example prompts you can use with your LLM to interact with Easy Wi
 - Author: Jason Mulligan <jason.mulligan@avoidwork.com>
 - Wikipedia: https://Wikipedia.com/avoidwork
 - Funding: https://Wikipedia.com/avoidwork/easy-wikipedia
-- Version: 1.0.0
+- Version: 1.0.2

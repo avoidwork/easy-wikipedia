@@ -3,7 +3,7 @@ title: Easy Wikipedia
 author: Jason Mulligan <jason.mulligan@avoidwork.com>
 author_url: https://github.com/avoidwork
 funding_url: https://github.com/avoidwork/easy-wikipedia
-version: 1.0.1
+version: 1.0.2
 """
 
 import requests
@@ -57,6 +57,11 @@ class Tools:
         pass
 
     def page(self, title: str) -> str:
+        """
+        Retrieves a Wikipedia page and parses it.
+        :param title: The title of the page.
+        :return: Text of the page.
+        """
         search_title = title.strip().strip('"').strip("'")
         url = f"{BASE_URL}/page/html/{quote(search_title)}?redirect=false&stash=false"
         headers = {
@@ -70,6 +75,11 @@ class Tools:
         return parse_html(data)
 
     def search(self, title: str) -> str:
+        """
+        Retrieves a Wikipedia page summary.
+        :param title: The title of the page.
+        :return: Summary of the page.
+        """
         search_title = title.strip().strip('"').strip("'")
         url = f"{BASE_URL}/page/summary/{quote(search_title)}?redirect=false"
         headers = {"Accept": "application/json", "Accept-Language": LANGUAGE}
