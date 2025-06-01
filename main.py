@@ -3,7 +3,7 @@ title: Easy Wikipedia
 author: Jason Mulligan <jason.mulligan@avoidwork.com>
 author_url: https://github.com/avoidwork
 funding_url: https://github.com/avoidwork/easy-wikipedia
-version: 1.0.6
+version: 1.0.7
 """
 
 import requests
@@ -93,6 +93,6 @@ class Tools:
         headers = {"Accept": "application/json", "Accept-Language": LANGUAGE}
         resp = requests.get(url, headers=headers)
         data = resp.json()
-        if not isinstance(data, list):
+        if not isinstance(data, list) or len(data) == 0 or len(data[1]) == 0:
             return f'Failed to find results for "{search_query}".'
         return get_page(title=data[1][0])
