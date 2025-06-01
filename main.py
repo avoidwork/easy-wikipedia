@@ -3,7 +3,7 @@ title: Easy Wikipedia
 author: Jason Mulligan <jason.mulligan@avoidwork.com>
 author_url: https://github.com/avoidwork
 funding_url: https://github.com/avoidwork/easy-wikipedia
-version: 1.0.4
+version: 1.0.5
 """
 
 import requests
@@ -12,7 +12,7 @@ import re
 from html.parser import HTMLParser
 from urllib.parse import quote
 
-BASE_URL = "https://en.wikipedia.org/api/rest_v1"
+BASE_URL = "https://en.wikipedia.org"
 LANGUAGE = "en-US"
 
 
@@ -71,7 +71,7 @@ class Tools:
         :return: Text of the page.
         """
         search_title = title.strip().strip('"').strip("'")
-        url = f"{BASE_URL}/page/html/{quote(search_title)}?redirect=false&stash=false"
+        url = f"{BASE_URL}/api/rest_v1/page/html/{quote(search_title)}?redirect=false&stash=false"
         headers = {
             "Accept": 'text/html; charset=utf-8; profile="https://www.mediawiki.org/wiki/Specs/HTML/2.1.0"',
             "Accept-Language": LANGUAGE,
@@ -82,24 +82,17 @@ class Tools:
             return f'Failed to fetch page for "{search_title}".'
         return parse_html(data)
 
-    def search(self, title: str) -> str:
+    def search(self, query: str) -> str:
         """
-        Retrieves a Wikipedia page summary.
-        :param title: The title of the page.
+        Search Wikipedia & retrieve the first result.
+        :param query: Search query.
         :return: Summary of the page.
         """
-        search_title = title.strip().strip('"').strip("'")
-        url = f"{BASE_URL}/page/summary/{quote(search_title)}?redirect=false"
+        search_query = query.strip().strip('"').strip("'")
+        url = f"{BASE_URL}/w/api.php?action=opensearch&search={quote(search_query)}&limit=1&namespace=0&format=json"
         headers = {"Accept": "application/json", "Accept-Language": LANGUAGE}
         resp = requests.get(url, headers=headers)
         data = resp.json()
-        if not isinstance(data, dict):
-            return f'Failed to fetch page summary for "{search_title}".'
-        page = {
-            "title": data.get("title"),
-            "description": data.get("description"),
-            "url": data.get("content_urls", {}).get("desktop", {}).get("page"),
-            "timestamp": data.get("timestamp"),
-            "revision": data.get("revision"),
-        }
-        return json.dumps(page)
+        if not isinstance(data, list):
+            return f'Failed to find results for "{search_query}".'
+        return self._page(title=data[1][0])
