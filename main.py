@@ -3,7 +3,7 @@ title: Easy Wikipedia
 author: Jason Mulligan <jason.mulligan@avoidwork.com>
 author_url: https://github.com/avoidwork
 funding_url: https://github.com/avoidwork/easy-wikipedia
-version: 1.0.5
+version: 1.0.6
 """
 
 import requests
@@ -53,10 +53,28 @@ class EasyWikipediaHTMLParser(HTMLParser):
         return text
 
 
-def parse_html(page_html):
+def parse_html(page_html: str) -> str:
     parser = EasyWikipediaHTMLParser()
     parser.feed(page_html)
     return parser.close()
+
+
+def sanitize(text: str) -> str:
+    return text.strip().strip('"').strip("'")
+
+
+def get_page(title: str) -> str:
+    page_title = sanitize(title)
+    url = f"{BASE_URL}/api/rest_v1/page/html/{quote(page_title)}?redirect=false&stash=false"
+    headers = {
+        "Accept": 'text/html; charset=utf-8; profile="https://www.mediawiki.org/wiki/Specs/HTML/2.1.0"',
+        "Accept-Language": LANGUAGE,
+    }
+    resp = requests.get(url, headers=headers)
+    data = resp.text
+    if len(data) == 0:
+        return f'Failed to fetch page for "{page_title}".'
+    return parse_html(data)
 
 
 class Tools:
@@ -64,35 +82,17 @@ class Tools:
         self.citation = True
         pass
 
-    def page(self, title: str) -> str:
-        """
-        Retrieves a Wikipedia page and parses it.
-        :param title: The title of the page.
-        :return: Text of the page.
-        """
-        search_title = title.strip().strip('"').strip("'")
-        url = f"{BASE_URL}/api/rest_v1/page/html/{quote(search_title)}?redirect=false&stash=false"
-        headers = {
-            "Accept": 'text/html; charset=utf-8; profile="https://www.mediawiki.org/wiki/Specs/HTML/2.1.0"',
-            "Accept-Language": LANGUAGE,
-        }
-        resp = requests.get(url, headers=headers)
-        data = resp.text
-        if len(data) == 0:
-            return f'Failed to fetch page for "{search_title}".'
-        return parse_html(data)
-
     def search(self, query: str) -> str:
         """
         Search Wikipedia & retrieve the first result.
         :param query: Search query.
         :return: Summary of the page.
         """
-        search_query = query.strip().strip('"').strip("'")
+        search_query = sanitize(query)
         url = f"{BASE_URL}/w/api.php?action=opensearch&search={quote(search_query)}&limit=1&namespace=0&format=json"
         headers = {"Accept": "application/json", "Accept-Language": LANGUAGE}
         resp = requests.get(url, headers=headers)
         data = resp.json()
         if not isinstance(data, list):
             return f'Failed to find results for "{search_query}".'
-        return self.page(title=data[1][0])
+        return get_page(title=data[1][0])
