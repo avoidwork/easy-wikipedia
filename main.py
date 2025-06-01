@@ -95,4 +95,4 @@ class Tools:
         data = resp.json()
         if not isinstance(data, list):
             return f'Failed to find results for "{search_query}".'
-        return self._page(title=data[1][0])
+        return self.page(title=data[1][0])

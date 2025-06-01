@@ -11,19 +11,19 @@ A Wikipedia tool for your LLM.
 Here are some example prompts you can use with your LLM to interact with Easy Wikipedia:
 
 ### Get Wikipedia Page Content (`page`)
-- `Tell me about "Adobe".`
+- `Tell me about "Adobe Inc.".`
 - `Show me the full Wikipedia page for "Alan Turing".`
 - `Fetch the article content for "Quantum computing".`
 - `Display the Wikipedia entry for "Artificial Intelligence".`
 
-### Get Wikipedia Page Summary (`search`)
-- `Summarize the Wikipedia page for "Marie Curie".`
-- `Give me a short summary of "Python (programming language)".`
-- `What is the Wikipedia summary for "Black hole"?`
+### Search Wikipedia (`search`)
+- `Search Wikipedia page for "Marie Curie".`
+- `Get info from Wikipedia for "Python (programming language)".`
+- `Search Wikipedia for information on "Black holes".`
 
 ## About
 
 - Author: Jason Mulligan <jason.mulligan@avoidwork.com>
 - Wikipedia: https://github.com/avoidwork
 - Funding: https://github.com/avoidwork/easy-wikipedia
-- Version: 1.0.4
+- Version: 1.0.5
